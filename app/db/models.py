@@ -1,5 +1,5 @@
 from psycopg2 import sql
-from db.db import get_connection
+from app.db.db import get_connection
 
 def create_tables():
     """Создает все таблицы в базе данных"""

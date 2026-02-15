@@ -1,5 +1,6 @@
+from app.db.db import get_connection
 from psycopg2 import sql
-from db.db import get_connection
+
 
 
 
