@@ -1,8 +1,7 @@
-
 from psycopg2 import sql
 from db.db import get_connection
 
-# ========== CRUD для таблицы categories ==========
+
 
 def create_category(title):
     """Создает новую категорию"""
@@ -106,7 +105,6 @@ def delete_category(category_id):
         cur.close()
         conn.close()
 
-# ========== CRUD для таблицы books ==========
 
 def create_book(title, description, price, category_id=None, url=''):
     """Создает новую книгу"""
@@ -196,13 +194,13 @@ def update_book(book_id, title=None, description=None, price=None, category_id=N
     try:
         cur = conn.cursor()
         
-        # Получаем текущие данные книги
+        
         cur.execute("SELECT * FROM books WHERE id = %s", (book_id,))
         current = cur.fetchone()
         if not current:
             return None
         
-        # Обновляем только переданные поля
+        
         updates = []
         values = []
         
