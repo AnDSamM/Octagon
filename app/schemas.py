@@ -1,8 +1,22 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
+from datetime import datetime
+
 
 class CategoryBase(BaseModel):
     title: str
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class CategoryUpdate(BaseModel):
+    title: Optional[str] = None
+
+class CategoryResponse(CategoryBase):
+    id: int
+    created_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
 
 class BookBase(BaseModel):
     title: str
@@ -11,14 +25,8 @@ class BookBase(BaseModel):
     url: Optional[str] = None
     category_id: Optional[int] = None
 
-class CategoryCreate(CategoryBase):
-    pass
-
 class BookCreate(BookBase):
     pass
-
-class CategoryUpdate(BaseModel):
-    title: Optional[str] = None
 
 class BookUpdate(BaseModel):
     title: Optional[str] = None
@@ -27,12 +35,10 @@ class BookUpdate(BaseModel):
     url: Optional[str] = None
     category_id: Optional[int] = None
 
-class CategoryResponse(CategoryBase):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
-
 class BookResponse(BookBase):
     id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     category_title: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 

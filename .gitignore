@@ -66,4 +66,4 @@ htmlcov/
 # Environment variables
 .env
 .env.*
-!.env.example
+!.env.example.env

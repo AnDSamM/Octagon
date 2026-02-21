@@ -1,71 +1,61 @@
-from psycopg2 import sql
-from app.db.db import get_connection
+from sqlalchemy import Column, Integer, String, Text, Numeric, DateTime, ForeignKey, Index
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from app.db.db import Base, engine
+
+class Category(Base):
+    """Модель категории книг"""
+    __tablename__ = "categories"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False, unique=True, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    
+    books = relationship("Book", back_populates="category", cascade="save-update")
+    
+    def __repr__(self):
+        return f"<Category(id={self.id}, title='{self.title}')>"
+
+class Book(Base):
+    """Модель книги"""
+    __tablename__ = "books"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    price = Column(Numeric(10, 2), nullable=False)
+    url = Column(String(500), nullable=True)
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    
+    category = relationship("Category", back_populates="books")
+    
+    __table_args__ = (
+        Index("idx_books_category", "category_id"),
+    )
+    
+    def __repr__(self):
+        return f"<Book(id={self.id}, title='{self.title}', price={self.price})>"
 
 def create_tables():
     """Создает все таблицы в базе данных"""
-    conn = get_connection()
-    if not conn:
-        return False
-    
     try:
-        cur = conn.cursor()
-        
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS categories (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL UNIQUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS books (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                description TEXT,
-                price DECIMAL(10, 2) NOT NULL,
-                url VARCHAR(500),
-                category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        
-        cur.execute("""
-            CREATE INDEX IF NOT EXISTS idx_books_category 
-            ON books(category_id)
-        """)
-        
-        conn.commit()
+        Base.metadata.create_all(bind=engine)
         print("Таблицы успешно созданы")
         return True
     except Exception as e:
-        conn.rollback()
         print(f"Ошибка при создании таблиц: {e}")
         return False
-    finally:
-        cur.close()
-        conn.close()
 
 def drop_tables():
     """Удаляет все таблицы (для очистки)"""
-    conn = get_connection()
-    if not conn:
-        return False
-    
     try:
-        cur = conn.cursor()
-        
-        cur.execute("DROP TABLE IF EXISTS books CASCADE")
-        cur.execute("DROP TABLE IF EXISTS categories CASCADE")
-        
-        conn.commit()
+        Base.metadata.drop_all(bind=engine)
         print("Таблицы успешно удалены")
         return True
     except Exception as e:
-        conn.rollback()
         print(f"Ошибка при удалении таблиц: {e}")
         return False
-    finally:
-        cur.close()
-        conn.close()

@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.api.categories import router as categories_router  # с префиксом app.
-from app.api.books import router as books_router            # с префиксом app.
+from app.api.categories import router as categories_router  
+from app.api.books import router as books_router            
 from app.db.db import test_connection
 from app.db.models import create_tables
 
@@ -24,7 +24,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Подключаем роутеры
+
 app.include_router(categories_router)
 app.include_router(books_router)
 
